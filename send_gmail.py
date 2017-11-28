@@ -1,6 +1,10 @@
+import os
 from gmail import GMail, Message
 
-from secret import GMAIL_ACCOUNT, GMAIL_PASSWD, MAIL_TO
+
+GMAIL_ACCOUNT = os.environ.get('GMAIL_ACCOUNT')
+GMAIL_PASSWD = os.environ.get('GMAIL_PASSWD')
+MAIL_TO = os.environ.get('MAIL_TO')
 
 
 class Email():

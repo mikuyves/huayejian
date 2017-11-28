@@ -41,8 +41,11 @@ def test():
 
 @engine.define
 def clear_empty_record():
-    check_empty_record('Prod', 'pid')
-    check_empty_record('Sku', 'name')
+    leancloud.use_master_key(True)
+    empty_prods = check_empty_record('Prod', 'pid')
+    empty_skus = check_empty_record('Sku', 'name')
+    leancloud.use_master_key(False)
+    return json.dumps([empty_prods, empty_skus])
 
 
 def check_empty_record(clsname, attr):
@@ -63,12 +66,11 @@ def check_empty_record(clsname, attr):
 
     # 少于5行，直接删除。
     elif obj_cnt > 0 and obj_cnt < 5:
-        # leancloud.Object.destroy_all(empty_objs)
+        leancloud.Object.destroy_all(empty_objs)
 
         title = 'LC-APP <huayejian>: DELETED {0} EMPTY RECORD(s) of {1}.'.format(obj_cnt, clsname)
         text = ''' There is {0} empty record(s) of {1}.
-I have delete it/them.
-Please the records deleted as follow:
+Records were deleted, as follow:
 {2}'''.format(obj_cnt, clsname, obj_json)
 
         email = Email(title=title, text=text)
@@ -87,3 +89,5 @@ Records found as follow:
         email = Email(title=title, text=text)
         email.send()
         print(text)
+
+    return obj_json
