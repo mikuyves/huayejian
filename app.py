@@ -75,11 +75,13 @@ tasks = [
 def root():
     return app.send_static_file('index.html')
 
+
 #GET方法api
 @app.route('/todo/api/tasks', methods=['GET'])
 def getTasks():
     tasks = Prod.query.limit(10).find()
     return jsonify(tasks=[obj_to_dict(task) for task in tasks])
+
 
 #POST方法API，添加数据项
 @app.route('/todo/api/addTask', methods=['POST'])
@@ -95,6 +97,7 @@ def add_task():
     tasks.append(task)
     return jsonify({'tasks': tasks}), 201
 
+
 #POST方法API，删除数据项
 @app.route('/todo/api/deleteTask', methods=['POST'])
 def delete_task():
@@ -104,10 +107,12 @@ def delete_task():
             tasks.remove(task)
     return jsonify({'tasks': tasks}), 201
 
+
 #404
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

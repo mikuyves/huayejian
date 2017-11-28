@@ -43,7 +43,7 @@
 				var self = this;
 				//在编译后即调用API接口取得服务器端数据
 				self.$http.get('/todo/api/tasks').then(function(res) {
-          let data = JSON.parse(res.data);
+                    let data = JSON.parse(res.data);
 					self.tasks = data.tasks;
 					console.log(res);
           console.log(res.data);
