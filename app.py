@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response, request, abort
 from flask import render_template
 from flask_sockets import Sockets
 
@@ -30,6 +30,11 @@ sockets = Sockets(app)
 # 动态路由
 app.register_blueprint(todos_view, url_prefix='/todos')
 
+# 注册 API 蓝本
+from api_1_0 import api as api_1_0_blueprint
+app.register_blueprint(api_1_0_blueprint, url_prefix='/api/v1.0')
+
+
 Prod = leancloud.Object.extend('Prod')
 Cate = leancloud.Object.extend('Cate')
 
@@ -50,7 +55,6 @@ def echo_socket(ws):
         message = ws.receive()
         ws.send(message)
 
-from flask import Flask, jsonify, make_response, request, abort
 
 # 静态文件的放置路径，可根据实际情况设置，这里设置为默认路径：'./static/'
 # app = Flask(__name__, static_url_path='')
