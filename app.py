@@ -31,6 +31,7 @@ sockets = Sockets(app)
 app.register_blueprint(todos_view, url_prefix='/todos')
 
 Prod = leancloud.Object.extend('Prod')
+Cate = leancloud.Object.extend('Cate')
 
 
 # @app.route('/')
@@ -81,6 +82,29 @@ def root():
 def getTasks():
     tasks = Prod.query.limit(10).find()
     return jsonify(tasks=[obj_to_dict(task) for task in tasks])
+
+
+@app.route('/goods', methods=['GET'])
+def get_goods():
+    tasks = Prod.query.limit(10).find()
+    goods = [obj_to_dict(task) for task in tasks]
+    data = {
+        'data': goods,
+        'code': 0
+    }
+    return jsonify(data)
+
+
+@app.route('/goods/inner_category', methods=['GET'])
+def get_cates():
+    cates = Cate.query.find()
+    categories = [obj_to_dict(cate) for cate in cates]
+    data = {
+        'data': categories,
+        'code': 0
+    }
+    return jsonify(data)
+
 
 
 #POST方法API，添加数据项
