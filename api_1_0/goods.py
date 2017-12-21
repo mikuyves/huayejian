@@ -7,6 +7,7 @@ from utils import obj_to_dict
 
 
 Prod = leancloud.Object.extend('Prod')
+Sku = leancloud.Object.extend('Sku')
 Cate = leancloud.Object.extend('Cate')
 
 
@@ -21,6 +22,17 @@ def get_goods():
     tasks = Prod.query.skip(start).limit(count).find()
     # 将 Leancloud Object 转为字典格式。
     goods = [obj_to_dict(task) for task in tasks]
+
+    for good in goods:
+        prod_id = good.get('objectId')
+        # 查找 Pointer 对象，需要用 create_without_data。
+        prod = Prod.create_without_data(prod_id)
+        skus = Sku.query.equal_to('prod', prod).find()
+        print(skus)
+        total_stock = sum([sku.get('stock') for sku in skus])
+
+        good['totalStock'] = total_stock
+        good['imageUrl'] = good.get('mainPicUrl')
 
     # 按前端格式打包数据，成功响应的 code 为 0。
     # 对照: 小程序项目 'src/utils/Http.js' 的 `isSuccess` 方法。
