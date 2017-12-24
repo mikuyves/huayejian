@@ -33,7 +33,7 @@ class Prod(leancloud.Object):
 
     @price.setter
     def price(self, value):
-        self.set(value)
+        self.set('retailPrice', value)
 
     @property
     def is_same_price(self):
