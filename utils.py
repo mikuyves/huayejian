@@ -1,4 +1,4 @@
-def lc_obj_dump(obj):
+def lc_dump(obj):
     '''把Leancloud 获取的对象转成字典。
     注意：如果使用了 include 获取对象的 pointer 字典，需要 pointer 单独进行一次转字典的处理。'''
     # 获取所有 pointer 的字段名。
@@ -10,7 +10,13 @@ def lc_obj_dump(obj):
     pointers = {key: obj.get(key).dump() for key in pointer_keys}
     # 处理 object。
     obj = obj.dump()
+    # 前段模板经常需要对象的 id 字段进行选择。
+    obj['id']  = obj.get('objectId')
     # 替换已经处理好的 pointer。
     for k, v in pointers.items():
         obj[k] = v
     return obj
+
+
+def lc_dumps(objs):
+    return [lc_dump(obj) for obj in objs]

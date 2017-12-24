@@ -5,7 +5,7 @@ from flask import jsonify, request
 
 import leancloud
 
-from utils import lc_obj_dump
+from utils import lc_dumps
 from models.goods import Prod, Sku, Cate, Brand, Supplier, Size, Color
 
 
@@ -42,7 +42,7 @@ def get_goods():
     prods = prod_query.find()
 
     # 将 Leancloud Object 转为字典格式。
-    goods = [lc_obj_dump(prod) for prod in prods]
+    goods = lc_dumps(prods)
     for good in goods:
         # TODO: SKU 规格总汇计算太慢，有待处理。
         prod_id = good.get('objectId')
@@ -90,14 +90,10 @@ def get_cates():
         new_cate.save()
 
     cates = Cate.query.ascending('createdAt').find()
-    categories = [lc_obj_dump(cate) for cate in cates]
-
-    # 前段 slider_selector 模板需要对象的 id 字段进行选择。
-    for cate in categories:
-        cate['id'] = cate.get('objectId')
+    cates = lc_dumps(cates)
 
     data = {
-        'data': categories,
+        'data': cates,
         'code': 0
     }
     return jsonify(data)
@@ -114,11 +110,7 @@ def get_brands():
         new_brand.save()
 
     brands = Brand.query.limit(300).ascending('name').find()
-    brands = [lc_obj_dump(b) for b in brands]
-
-    # 前段 slider_selector 模板需要对象的 id 字段进行选择。
-    for brand in brands:
-        brand['id'] = brand.get('objectId')
+    brands = lc_dumps(brands)
 
     data = {
         'data': brands,
@@ -138,11 +130,7 @@ def get_suppliers():
         new_supplier.save()
 
     suppliers = Supplier.query.ascending('name').limit(300).find()
-    suppliers = [lc_obj_dump(s) for s in suppliers]
-
-    # 前段 slider_selector 模板需要对象的 id 字段进行选择。
-    for supplier in suppliers:
-        supplier['id'] = supplier.get('objectId')
+    suppliers = lc_dumps(suppliers)
 
     data = {
         'data': suppliers,
@@ -154,11 +142,7 @@ def get_suppliers():
 @api.route('/goods/sizes')
 def get_sizes():
     sizes = Size.query.ascending('order').find()
-    sizes = [lc_obj_dump(s) for s in sizes]
-
-    # 前段 slider_selector 模板需要对象的 id 字段进行选择。
-    for size in sizes:
-        size['id'] = size.get('objectId')
+    sizes = lc_dumps(sizes)
 
     data = {
         'data': sizes,
@@ -170,11 +154,7 @@ def get_sizes():
 @api.route('/goods/colors')
 def get_colors():
     colors = Color.query.ascending('order').find()
-    colors = [lc_obj_dump(c) for c in colors]
-
-    # 前段 slider_selector 模板需要对象的 id 字段进行选择。
-    for color in colors:
-        color['id'] = color.get('objectId')
+    colors = lc_dumps(colors)
 
     data = {
         'data': colors,

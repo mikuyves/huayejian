@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from leancloud import Engine
 from leancloud import LeanEngineError
 import leancloud
-from utils import lc_obj_dump
+from utils import lc_dump
 from send_gmail import Email
 
 
@@ -35,7 +35,7 @@ def before_todo_save(todo):
 @engine.define
 def test():
     prod_objs = Prod.query.find()
-    prods = [lc_obj_dump(obj) for obj in prod_objs]
+    prods = [lc_dump(obj) for obj in prod_objs]
     return json.dumps(prods)
 
 
@@ -57,7 +57,7 @@ def check_empty_record(clsname, attr):
 
     # 重要：一定要确保没有 pid 的对象！
     empty_objs = [obj for obj in objs if not obj.get(attr)]
-    obj_dicts = [lc_obj_dump(obj) for obj in empty_objs]
+    obj_dicts = [lc_dump(obj) for obj in empty_objs]
     obj_cnt = len(obj_dicts)
     obj_json = json.dumps(obj_dicts)
 
