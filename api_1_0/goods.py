@@ -11,6 +11,10 @@ from utils import obj_to_dict
 Prod = leancloud.Object.extend('Prod')
 Sku = leancloud.Object.extend('Sku')
 Cate = leancloud.Object.extend('Cate')
+Brand = leancloud.Object.extend('Brand')
+Supplier = leancloud.Object.extend('Supplier')
+Size = leancloud.Object.extend('Size')
+Color = leancloud.Object.extend('Color')
 
 
 @api.route('/goods/')
@@ -70,9 +74,17 @@ def get_goods():
     return jsonify(data)
 
 
-@api.route('/goods/inner_category')
+@api.route('/goods/inner_category', methods=['GET', 'POST'])
 def get_cates():
-    cates = Cate.query.find()
+    args = request.args if request.method == 'GET' else request.json
+    print(args)
+    name = args.get('name')
+    if name:
+        new_cate = Cate()
+        new_cate.set('name', name)
+        new_cate.save()
+
+    cates = Cate.query.ascending('createdAt').find()
     categories = [obj_to_dict(cate) for cate in cates]
 
     # 前段 slider_selector 模板需要对象的 id 字段进行选择。
@@ -81,6 +93,86 @@ def get_cates():
 
     data = {
         'data': categories,
+        'code': 0
+    }
+    return jsonify(data)
+
+
+@api.route('/goods/brands', methods=['GET', 'POST'])
+def get_brands():
+    args = request.args if request.method == 'GET' else request.json
+    print(args)
+    name = args.get('name')
+    if name:
+        new_brand = Brand()
+        new_brand.set('name', name)
+        new_brand.save()
+
+    brands = Brand.query.limit(300).ascending('name').find()
+    brands = [obj_to_dict(b) for b in brands]
+
+    # 前段 slider_selector 模板需要对象的 id 字段进行选择。
+    for brand in brands:
+        brand['id'] = brand.get('objectId')
+
+    data = {
+        'data': brands,
+        'code': 0
+    }
+    return jsonify(data)
+
+
+@api.route('/goods/suppliers', methods=['GET', 'POST'])
+def get_suppliers():
+    args = request.args if request.method == 'GET' else request.json
+    print(args)
+    name = args.get('name')
+    if name:
+        new_supplier = Supplier()
+        new_supplier.set('name', name)
+        new_supplier.save()
+
+    suppliers = Supplier.query.ascending('name').limit(300).find()
+    suppliers = [obj_to_dict(s) for s in suppliers]
+
+    # 前段 slider_selector 模板需要对象的 id 字段进行选择。
+    for supplier in suppliers:
+        supplier['id'] = supplier.get('objectId')
+
+    data = {
+        'data': suppliers,
+        'code': 0
+    }
+    return jsonify(data)
+
+
+@api.route('/goods/sizes')
+def get_sizes():
+    sizes = Size.query.ascending('order').find()
+    sizes = [obj_to_dict(s) for s in sizes]
+
+    # 前段 slider_selector 模板需要对象的 id 字段进行选择。
+    for size in sizes:
+        size['id'] = size.get('objectId')
+
+    data = {
+        'data': sizes,
+        'code': 0
+    }
+    return jsonify(data)
+
+
+@api.route('/goods/colors')
+def get_colors():
+    colors = Color.query.ascending('order').find()
+    colors = [obj_to_dict(c) for c in colors]
+
+    # 前段 slider_selector 模板需要对象的 id 字段进行选择。
+    for color in colors:
+        color['id'] = color.get('objectId')
+
+    data = {
+        'data': colors,
         'code': 0
     }
     return jsonify(data)
