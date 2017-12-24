@@ -6,15 +6,7 @@ from flask import jsonify, request
 import leancloud
 
 from utils import obj_to_dict
-
-
-Prod = leancloud.Object.extend('Prod')
-Sku = leancloud.Object.extend('Sku')
-Cate = leancloud.Object.extend('Cate')
-Brand = leancloud.Object.extend('Brand')
-Supplier = leancloud.Object.extend('Supplier')
-Size = leancloud.Object.extend('Size')
-Color = leancloud.Object.extend('Color')
+from models.goods import Prod, Sku, Cate, Brand, Supplier, Size, Color
 
 
 @api.route('/goods/')
@@ -54,9 +46,7 @@ def get_goods():
     for good in goods:
         # TODO: SKU 规格总汇计算太慢，有待处理。
         prod_id = good.get('objectId')
-        # 查找 Pointer 对象，需要用 create_without_data。
-        prod = Prod.create_without_data(prod_id)
-        skus = Sku.query.equal_to('prod', prod).find()
+        skus = Prod.get_skus(prod_id)
         print(skus)
         total_stock = sum([sku.get('stock') for sku in skus])
 
@@ -74,6 +64,21 @@ def get_goods():
     return jsonify(data)
 
 
+@api.route('/goods', methods=['POST'])
+def create_goods():
+    data = request.json
+    print(data)
+    brand = data.get('brannd')
+    brand_id = brand.get('id')
+    cate = data.get('cate')
+    cate_id = cate.get('id')
+    feat = data.get('feat')
+    is_all_sold_out = data.get('isAllSoldOut')
+    is_same_price = data.get('isSamePrice')
+    print(type(is_same_price))
+    return jsonify({'test': 200, 'code': 0})
+
+
 @api.route('/goods/inner_category', methods=['GET', 'POST'])
 def get_cates():
     args = request.args if request.method == 'GET' else request.json
@@ -81,7 +86,7 @@ def get_cates():
     name = args.get('name')
     if name:
         new_cate = Cate()
-        new_cate.set('name', name)
+        new_cate.name = name
         new_cate.save()
 
     cates = Cate.query.ascending('createdAt').find()
@@ -105,7 +110,7 @@ def get_brands():
     name = args.get('name')
     if name:
         new_brand = Brand()
-        new_brand.set('name', name)
+        new_brand.name = name
         new_brand.save()
 
     brands = Brand.query.limit(300).ascending('name').find()
@@ -129,7 +134,7 @@ def get_suppliers():
     name = args.get('name')
     if name:
         new_supplier = Supplier()
-        new_supplier.set('name', name)
+        new_supplier.name = name
         new_supplier.save()
 
     suppliers = Supplier.query.ascending('name').limit(300).find()
