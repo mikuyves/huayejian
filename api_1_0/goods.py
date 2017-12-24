@@ -55,28 +55,27 @@ def get_goods():
         good['priceText'] = '¥ ' + str(good.get('retailPrice'))
         good['skuCount'] = len(skus)
 
-    # 按前端格式打包数据，成功响应的 code 为 0。
-    # 对照: 小程序项目 'src/utils/Http.js' 的 `isSuccess` 方法。
-    data = {
-        'data': goods,
-        'code': 0
-    }
-    return jsonify(data)
+    return jsonify({'data': goods})
 
 
 @api.route('/goods', methods=['POST'])
 def create_goods():
     data = request.json
     print(data)
-    brand = data.get('brannd')
-    brand_id = brand.get('id')
-    cate = data.get('cate')
-    cate_id = cate.get('id')
-    feat = data.get('feat')
-    is_all_sold_out = data.get('isAllSoldOut')
-    is_same_price = data.get('isSamePrice')
-    print(type(is_same_price))
-    return jsonify({'test': 200, 'code': 0})
+    prod = Prod()
+    prod.brand = data.get('brand').get('id')
+    prod.cate = data.get('cate').get('id')
+    prod.supplier = data.get('supplier').get('id')
+    prod.pid = data.get('pid')
+    prod.price = data.get('retailPrice')
+    prod.name = data.get('name')
+    prod.feat = data.get('feat')
+    prod.is_all_sold_out = data.get('isAllSoldOut')
+    prod.is_same_price = data.get('isSamePrice')
+    prod.is_one_price = data.get('isOnePrice')
+    prod.save()
+
+    return jsonify({'msg': 'saved'})
 
 
 @api.route('/goods/inner_category', methods=['GET', 'POST'])
@@ -92,11 +91,7 @@ def get_cates():
     cates = Cate.query.ascending('createdAt').find()
     cates = lc_dumps(cates)
 
-    data = {
-        'data': cates,
-        'code': 0
-    }
-    return jsonify(data)
+    return jsonify({'data': cates})
 
 
 @api.route('/goods/brands', methods=['GET', 'POST'])
@@ -112,11 +107,7 @@ def get_brands():
     brands = Brand.query.limit(300).ascending('name').find()
     brands = lc_dumps(brands)
 
-    data = {
-        'data': brands,
-        'code': 0
-    }
-    return jsonify(data)
+    return jsonify({'data': brands})
 
 
 @api.route('/goods/suppliers', methods=['GET', 'POST'])
@@ -132,11 +123,7 @@ def get_suppliers():
     suppliers = Supplier.query.ascending('name').limit(300).find()
     suppliers = lc_dumps(suppliers)
 
-    data = {
-        'data': suppliers,
-        'code': 0
-    }
-    return jsonify(data)
+    return jsonify({'data': suppliers})
 
 
 @api.route('/goods/sizes')
@@ -144,11 +131,7 @@ def get_sizes():
     sizes = Size.query.ascending('order').find()
     sizes = lc_dumps(sizes)
 
-    data = {
-        'data': sizes,
-        'code': 0
-    }
-    return jsonify(data)
+    return jsonify({'data': sizes})
 
 
 @api.route('/goods/colors')
@@ -156,8 +139,4 @@ def get_colors():
     colors = Color.query.ascending('order').find()
     colors = lc_dumps(colors)
 
-    data = {
-        'data': colors,
-        'code': 0
-    }
-    return jsonify(data)
+    return jsonify({'data': colors})
