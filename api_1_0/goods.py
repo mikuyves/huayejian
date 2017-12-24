@@ -5,7 +5,7 @@ from flask import jsonify, request
 
 import leancloud
 
-from utils import obj_to_dict
+from utils import lc_obj_dump
 from models.goods import Prod, Sku, Cate, Brand, Supplier, Size, Color
 
 
@@ -42,7 +42,7 @@ def get_goods():
     prods = prod_query.find()
 
     # 将 Leancloud Object 转为字典格式。
-    goods = [obj_to_dict(prod) for prod in prods]
+    goods = [lc_obj_dump(prod) for prod in prods]
     for good in goods:
         # TODO: SKU 规格总汇计算太慢，有待处理。
         prod_id = good.get('objectId')
@@ -90,7 +90,7 @@ def get_cates():
         new_cate.save()
 
     cates = Cate.query.ascending('createdAt').find()
-    categories = [obj_to_dict(cate) for cate in cates]
+    categories = [lc_obj_dump(cate) for cate in cates]
 
     # 前段 slider_selector 模板需要对象的 id 字段进行选择。
     for cate in categories:
@@ -114,7 +114,7 @@ def get_brands():
         new_brand.save()
 
     brands = Brand.query.limit(300).ascending('name').find()
-    brands = [obj_to_dict(b) for b in brands]
+    brands = [lc_obj_dump(b) for b in brands]
 
     # 前段 slider_selector 模板需要对象的 id 字段进行选择。
     for brand in brands:
@@ -138,7 +138,7 @@ def get_suppliers():
         new_supplier.save()
 
     suppliers = Supplier.query.ascending('name').limit(300).find()
-    suppliers = [obj_to_dict(s) for s in suppliers]
+    suppliers = [lc_obj_dump(s) for s in suppliers]
 
     # 前段 slider_selector 模板需要对象的 id 字段进行选择。
     for supplier in suppliers:
@@ -154,7 +154,7 @@ def get_suppliers():
 @api.route('/goods/sizes')
 def get_sizes():
     sizes = Size.query.ascending('order').find()
-    sizes = [obj_to_dict(s) for s in sizes]
+    sizes = [lc_obj_dump(s) for s in sizes]
 
     # 前段 slider_selector 模板需要对象的 id 字段进行选择。
     for size in sizes:
@@ -170,7 +170,7 @@ def get_sizes():
 @api.route('/goods/colors')
 def get_colors():
     colors = Color.query.ascending('order').find()
-    colors = [obj_to_dict(c) for c in colors]
+    colors = [lc_obj_dump(c) for c in colors]
 
     # 前段 slider_selector 模板需要对象的 id 字段进行选择。
     for color in colors:

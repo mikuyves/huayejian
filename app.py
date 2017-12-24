@@ -8,7 +8,7 @@ from flask_sockets import Sockets
 
 from views.todos import todos_view
 import leancloud
-from utils import obj_to_dict
+from utils import lc_obj_dump
 
 
 class CustomFlask(Flask):
@@ -85,13 +85,13 @@ def root():
 @app.route('/todo/api/tasks', methods=['GET'])
 def getTasks():
     tasks = Prod.query.limit(10).find()
-    return jsonify(tasks=[obj_to_dict(task) for task in tasks])
+    return jsonify(tasks=[lc_obj_dump(task) for task in tasks])
 
 
 @app.route('/goods', methods=['GET'])
 def get_goods():
     tasks = Prod.query.limit(10).find()
-    goods = [obj_to_dict(task) for task in tasks]
+    goods = [lc_obj_dump(task) for task in tasks]
     data = {
         'data': goods,
         'code': 0
@@ -102,7 +102,7 @@ def get_goods():
 @app.route('/goods/inner_category', methods=['GET'])
 def get_cates():
     cates = Cate.query.find()
-    categories = [obj_to_dict(cate) for cate in cates]
+    categories = [lc_obj_dump(cate) for cate in cates]
     data = {
         'data': categories,
         'code': 0

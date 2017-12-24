@@ -1,4 +1,4 @@
-def obj_to_dict(obj):
+def lc_obj_dump(obj):
     '''把Leancloud 获取的对象转成字典。
     注意：如果使用了 include 获取对象的 pointer 字典，需要 pointer 单独进行一次转字典的处理。'''
     # 获取所有 pointer 的字段名。
