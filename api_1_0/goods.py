@@ -17,7 +17,7 @@ def get_goods():
     category_id = request.args.get('category_id')
     status = request.args.get('goods_status')
     # 搜索关键字是 JSON 字符串，需要转换格式。
-    keywords = json.loads(request.args.get('search_keywords'))
+    keywords = request.args.get('search_keywords')
     print(request.args)
 
     # 分页获取对象。
@@ -25,10 +25,13 @@ def get_goods():
         .descending('createdAt')\
         .skip(start)\
         .limit(count)\
-        .include('supplier')
+        .include('supplier')\
+        .include('mainPic')\
+        .include('images')
 
     # 搜索
     if keywords:
+        keywords = json.loads(keywords)
         for kw in keywords:
             prod_query.contains('name', kw.upper())
     # 状态
@@ -43,6 +46,7 @@ def get_goods():
 
     # 将 Leancloud Object 转为字典格式。
     goods = lc_dumps(prods)
+    # 处理 SKU 及前端需求字段。
     for good in goods:
         # TODO: SKU 规格总汇计算太慢，有待处理。
         prod_id = good.get('objectId')
@@ -50,8 +54,8 @@ def get_goods():
         print(skus)
         total_stock = sum([sku.get('stock') for sku in skus])
 
+        # 小程序前端需求字段。
         good['totalStock'] = total_stock
-        good['imageUrl'] = good.get('mainPicUrl')
         good['priceText'] = '¥ ' + str(good.get('retailPrice'))
         good['skuCount'] = len(skus)
 
@@ -60,6 +64,7 @@ def get_goods():
 
 @api.route('/goods', methods=['POST'])
 def create_goods():
+    """新建商品。"""
     data = request.json
     print(data)
     # SPU
@@ -74,12 +79,20 @@ def create_goods():
     prod.is_all_sold_out = data.get('isAllSoldOut')
     prod.is_same_price = data.get('isSamePrice')
     prod.is_one_price = data.get('isOnePrice')
-    prod.main_pic_url = data.get('images')[0].get('url')
-    main_pic_id = data.get('images')[0].get('objectId')
-    # 生成缩略图。
-    image = leancloud.File.create_without_data(main_pic_id)
-    image.fetch()
-    prod.thumbnail_url = image.get_thumbnail_url(100, 100)
+
+    # Images
+    leancloud.use_master_key(True)
+    image_data = data.get('images')
+    images = [
+        leancloud.File.create_without_data(i.get('objectId')) for i in image_data
+    ]
+    prod.images = images
+    main_pic = images[0]
+    prod.main_pic = main_pic
+    main_pic.fetch()
+    prod.main_pic_url = main_pic.url
+    prod.thumbnail_url = main_pic.get_thumbnail_url(100, 100)
+
     prod.save()
 
     # SKU
