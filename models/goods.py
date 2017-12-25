@@ -3,6 +3,9 @@ import leancloud
 
 class Prod(leancloud.Object):
     """SPU of products."""
+    def __repr__(self):
+        return self.name
+
     @property
     def pid(self):
         return self.get('pid')
@@ -61,26 +64,32 @@ class Prod(leancloud.Object):
 
     @property
     def cate(self):
+        """Pointer."""
         return self.get('cate')
 
     @cate.setter
     def cate(self, id):
+        """Pointer."""
         self.set('cate', Cate.create_without_data(id))
 
     @property
     def brand(self):
+        """Pointer."""
         return self.get('brand')
 
     @brand.setter
     def brand(self, id):
+        """Pointer."""
         self.set('brand', Brand.create_without_data(id))
 
     @property
     def supplier(self):
+        """Pointer."""
         return self.get('supplier')
 
     @supplier.setter
     def supplier(self, id):
+        """Pointer."""
         self.set('supplier', Supplier.create_without_data(id))
 
     @property
@@ -98,6 +107,32 @@ class Prod(leancloud.Object):
     @thumbnail_url.setter
     def thumbnail_url(self, value):
         self.set('thumbnailUrl', value)
+
+    @property
+    def main_pic(self):
+        return self.get('mainPic')
+
+    @main_pic.setter
+    def main_pic(self, value):
+        self.set('mainPIc', value)
+
+    @property
+    def main_pic(self):
+        return self.get('mainPic')
+
+    @main_pic.setter
+    def main_pic(self, value):
+        self.set('mainPIc', value)
+
+    @property
+    def images(self):
+        """Relations."""
+        return self.get('images')
+
+    @images.setter
+    def images(self, value):
+        """Relations."""
+        self.set('images', value)
 
     @classmethod
     def get_skus(cls, id):
