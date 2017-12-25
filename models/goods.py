@@ -138,6 +138,14 @@ class Prod(leancloud.Object):
     def get_skus(cls, id):
         return Sku.query.equal_to('prod', cls.create_without_data(id)).find()
 
+    def get_skus_with_detail(self):
+        skus = Sku.query\
+            .equal_to('prod', self)\
+            .include('color')\
+            .include('size1')\
+            .find()
+        return skus
+
 
 class Sku(leancloud.Object):
     @property
