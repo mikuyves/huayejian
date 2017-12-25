@@ -82,6 +82,24 @@ def create_goods():
     prod.thumbnail_url = image.get_thumbnail_url(100, 100)
     prod.save()
 
+    # SKU
+    sku_data = data.get('skuList')
+    skus = []
+    for s in sku_data:
+        sku = Sku()
+        # 前端传过来的 size1，color 的数据类型是 Object，不能直接存。
+        # 之前在小程序端，直接用 sdk 传对象的方法行不通。要用 create_without_data 包装。
+        sku.size1 = s.get('size1').get('id')
+        sku.color = s.get('color').get('id')
+        sku.full_name = s.get('fullName')
+        sku.name = s.get('name')
+        sku.price4 = s.get('price4')
+        sku.size2 = s.get('size2')
+        sku.stock = s.get('stock')
+        sku.is_sold_out = s.get('isSoldOut')
+        sku.prod = prod.id
+        sku.save()
+
     return jsonify({'msg': 'saved'})
 
 

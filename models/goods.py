@@ -115,11 +115,11 @@ class Sku(leancloud.Object):
 
     @property
     def full_name(self):
-        return self.get('full_name')
+        return self.get('fullName')
 
     @full_name.setter
     def full_name(self, value):
-        self.set('full_name', value)
+        self.set('fullName', value)
 
     @property
     def price4(self):
@@ -158,16 +158,16 @@ class Sku(leancloud.Object):
         return self.get('size1')
 
     @size1.setter
-    def size1(self, value):
-        self.set('size1', value)
+    def size1(self, id):
+        self.set('size1', Size.create_without_data(id))
 
     @property
     def color(self):
         return self.get('color')
 
     @color.setter
-    def color(self, value):
-        self.set('color', value)
+    def color(self, id):
+        self.set('color', Color.create_without_data(id))
 
     @property
     def prod(self):
