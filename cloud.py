@@ -93,11 +93,13 @@ Records found as follow:
 
 # 生成主图缩略图
 @engine.define
-def make_thumbnail():
+def make_thumbnail(**params):
+    num = params.setdefault('num', 1)
+
     leancloud.use_master_key(True)
     File = leancloud.Object.extend('_File')
-    prods = Prod.query.limit(1)\
-        .descending('CreatedAt')\
+    prods = Prod.query.limit(num)\
+        .ascending('CreatedAt')\
         .find()
     for num, p in enumerate(prods):
         url = p.get('mainPicUrl')
@@ -118,10 +120,12 @@ def make_thumbnail():
 
 # 生成SPU图像对象关系。
 @engine.define
-def make_image_relations():
+def make_image_relations(**params):
+    num = params.setdefault('num', 1)
+
     leancloud.use_master_key(True)
     File = leancloud.Object.extend('_File')
-    prods = Prod.query.limit(1000) \
+    prods = Prod.query.limit(num) \
         .ascending('CreatedAt') \
         .find()
     for num, p in enumerate(prods):
