@@ -59,6 +59,8 @@ def get_goods():
         good['skuCount'] = len(skus)
         good['imageUrl'] = good.get('thumbnailUrl', '/images/icons/broken.png')
 
+    print(goods)
+
     return jsonify({'data': goods})
 
 
@@ -70,16 +72,16 @@ def create_goods():
     data = request.json
     print(data)
     # SPU
-    if request.method == 'PUT':
-        id_ = request.args.get('id')
-        prod = Prod.create_without_data(id_)
-    else:
+    prod_id = request.args.get('id') if request.method == 'PUT' else None
+    if prod_id: # Update
+        prod = Prod.create_without_data(prod_id)
+    else: # Create
         prod = Prod()
+        prod.pid = data.get('pid')
 
     prod.brand = data.get('brand').get('id')
     prod.cate = data.get('cate').get('id')
     prod.supplier = data.get('supplier').get('id')
-    prod.pid = data.get('pid')
     prod.price = data.get('retailPrice')
     prod.name = data.get('name')
     prod.feat = data.get('feat')
@@ -114,7 +116,11 @@ def create_goods():
     sku_data = data.get('skuList')
     skus = []
     for s in sku_data:
-        sku = Sku()
+        sku_id = s.get('objectId')
+        if sku_id:  # Update
+            sku = Sku.create_without_data(sku_id)
+        else:  # Create
+            sku = Sku()
         # 前端传过来的 size1，color 的数据类型是 Object，不能直接存。
         # 之前在小程序端，直接用 sdk 传对象的方法行不通。要用 create_without_data 包装。
         sku.size1 = s.get('size1').get('id')
@@ -128,13 +134,16 @@ def create_goods():
         sku.prod = prod.id
         sku.save()
 
+    # 从数据库中删除图片。
     deleted_pics = data.get('deletedPics')
-    if deleted_pics:
-        deleted_pics = [
-            leancloud.File.create_without_data(p.get('id')) for p in deleted_pics
-        ]
-        for p in deleted_pics:
-            p.destroy()
+    for id_ in deleted_pics:
+        p = leancloud.File.create_without_data(id_)
+        p.destroy()
+    # 删除 SKU。
+    deleted_skus_ids = data.get('deletedSkuIds')
+    for id_ in deleted_skus_ids:
+        s = Sku.create_without_data(id_)
+        s.destroy()
 
     leancloud.use_master_key(False)
     return jsonify({'msg': 'saved'})
@@ -160,6 +169,7 @@ def get_detail():
         'prod': lc_dump(prod),
         'skus': lc_dumps(skus)
     }
+    print(data)
 
     return jsonify({'data': data})
 
