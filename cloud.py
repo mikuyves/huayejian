@@ -60,16 +60,16 @@ def check_empty_record(clsname, attr):
     obj_json = json.dumps(obj_dicts)
 
     if obj_cnt == 0:
-        print('Checked {}. No empty record found.'.format(clsname))
+        print(f'Checked {clsname}. No empty record found.')
 
     # 少于5行，直接删除。
     elif obj_cnt > 0 and obj_cnt < 5:
         leancloud.Object.destroy_all(empty_objs)
 
-        title = 'LC-APP <huayejian>: DELETED {0} EMPTY RECORD(s) of {1}.'.format(obj_cnt, clsname)
-        text = ''' There is {0} empty record(s) of {1}.
+        title = f'LC-APP <huayejian>: DELETED {obj_cnt} EMPTY RECORD(s) of {clsname}.'
+        text = f''' There is {obj_cnt} empty record(s) of {clsname}.
 Records were deleted, as follow:
-{2}'''.format(obj_cnt, clsname, obj_json)
+{obj_json}'''
 
         email = Email(title=title, text=text)
         email.send()
@@ -78,11 +78,11 @@ Records were deleted, as follow:
     # 大于等于5行， 手动删除。
     else:
         title = 'IMPORTANT! LC-APP <huayejian>: FOUND {0} EMPTY RECORDS of {1}!'.format(obj_cnt, clsname)
-        text = '''I have found {0} empty record in {1} table of the database.
+        text = f'''I have found {obj_cnt} empty record in {clsname} table of the database.
 Please check up the database immediately!
 Delete the empty lines manually as soon as possible.
 Records found as follow:
-{2}'''.format(obj_cnt, clsname, obj_json)
+{obj_json}'''
 
         email = Email(title=title, text=text)
         email.send()
