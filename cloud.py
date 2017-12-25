@@ -115,7 +115,7 @@ def make_thumbnail(**params):
             print(f'Update thumbnail. {num:d}')
         else:
             print(f'No main picture. {num:d}')
-    leancloud.use_master_key(True)
+    leancloud.use_master_key(False)
 
 
 # 生成SPU图像对象关系。
@@ -125,17 +125,14 @@ def make_image_relations(**params):
 
     leancloud.use_master_key(True)
     File = leancloud.Object.extend('_File')
-    prods = Prod.query.limit(num) \
-        .ascending('CreatedAt') \
-        .find()
+    prods = Prod.query.ascending('createdAt').limit(num).find()
     for num, p in enumerate(prods):
         urls = p.get('picUrls')
         for url in urls:
             results = File.query.equal_to('url', url).find()
             if results:
-                for image in results:
-                    relation = p.relation('images')
-                    relation.add(image)
+                p.images = results
                 p.save()
                 print(f'Relation saved. {num:d} {p}')
+    leancloud.use_master_key(False)
 
