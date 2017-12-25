@@ -7,12 +7,10 @@ from leancloud import LeanEngineError
 import leancloud
 from utils import lc_dump
 from send_gmail import Email
+from models.goods import Prod, Sku
 
 
 engine = Engine()
-
-
-Prod = leancloud.Object.extend('Prod')
 
 
 @engine.define
@@ -91,3 +89,49 @@ Records found as follow:
         print(text)
 
     return obj_json
+
+
+# 生成主图缩略图
+@engine.define
+def make_thumbnail():
+    leancloud.use_master_key(True)
+    File = leancloud.Object.extend('_File')
+    prods = Prod.query.limit(1)\
+        .descending('CreatedAt')\
+        .find()
+    for num, p in enumerate(prods):
+        url = p.get('mainPicUrl')
+        results = File.query.equal_to('url', url).find()
+        if results:
+            f = results[0]
+            image = leancloud.File.create_without_data(f.id)
+            p.main_pic = image
+            image.fetch()
+            thumnail_url = image.get_thumbnail_url(100, 100)
+            p.thumbnail_url = thumnail_url
+            p.save()
+            print(f'Update thumbnail. {num:d}')
+        else:
+            print(f'No main picture. {num:d}')
+    leancloud.use_master_key(True)
+
+
+# 生成SPU图像对象关系。
+@engine.define
+def make_image_relations():
+    leancloud.use_master_key(True)
+    File = leancloud.Object.extend('_File')
+    prods = Prod.query.limit(1000) \
+        .ascending('CreatedAt') \
+        .find()
+    for num, p in enumerate(prods):
+        urls = p.get('picUrls')
+        for url in urls:
+            results = File.query.equal_to('url', url).find()
+            if results:
+                for image in results:
+                    relation = p.relation('images')
+                    relation.add(image)
+                p.save()
+                print(f'Relation saved. {num:d} {p}')
+
