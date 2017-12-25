@@ -57,6 +57,7 @@ def get_goods():
         good['totalStock'] = total_stock
         good['priceText'] = '¥ ' + str(good.get('retailPrice'))
         good['skuCount'] = len(skus)
+        good['imageUrl'] = good.get('thumbnailUrl', '/images/icons/broken.png')
 
     return jsonify({'data': goods})
 
