@@ -62,13 +62,20 @@ def get_goods():
     return jsonify({'data': goods})
 
 
-@api.route('/goods', methods=['POST'])
+@api.route('/goods', methods=['POST', 'PUT'])
 def create_goods():
     """新建商品。"""
+    leancloud.use_master_key(True)
+
     data = request.json
     print(data)
     # SPU
-    prod = Prod()
+    if request.method == 'PUT':
+        id_ = request.args.get('id')
+        prod = Prod.create_without_data(id_)
+    else:
+        prod = Prod()
+
     prod.brand = data.get('brand').get('id')
     prod.cate = data.get('cate').get('id')
     prod.supplier = data.get('supplier').get('id')
@@ -83,9 +90,17 @@ def create_goods():
     # Images
     leancloud.use_master_key(True)
     image_data = data.get('images')
-    images = [
-        leancloud.File.create_without_data(i.get('objectId')) for i in image_data
-    ]
+    # images = [
+    #     leancloud.File.create_without_data(i.get('objectId')) for i in image_data
+    # ]
+    images = []
+    for i in image_data:
+        id_ = i.get('id') if i.get('id') else i.get('objectId')
+        image = leancloud.File.create_without_data(id_)
+        images.append(image)
+
+    print(images)
+
     prod.images = images
     main_pic = images[0]
     prod.main_pic = main_pic
@@ -113,6 +128,15 @@ def create_goods():
         sku.prod = prod.id
         sku.save()
 
+    deleted_pics = data.get('deletedPics')
+    if deleted_pics:
+        deleted_pics = [
+            leancloud.File.create_without_data(p.get('id')) for p in deleted_pics
+        ]
+        for p in deleted_pics:
+            p.destroy()
+
+    leancloud.use_master_key(False)
     return jsonify({'msg': 'saved'})
 
 
@@ -123,11 +147,6 @@ def get_detail():
     _id = args.get('id')
 
     prod = Prod.create_without_data(_id)
-    skus = Sku.query\
-        .equal_to('prod', prod)\
-        .include('color')\
-        .include('size1')\
-        .find()
 
     prod.fetch(
         # fetch: 从云端数据库获取数据到本地（服务器），使用后会覆盖本地数据。
@@ -135,10 +154,11 @@ def get_detail():
         # include: 获取 Pointer 的数据。
         include=['brand', 'cate', 'supplier', 'images']
     )
+    skus = prod.get_skus_with_detail()
 
     data = {
         'prod': lc_dump(prod),
-        'skuList': lc_dumps(skus)
+        'skus': lc_dumps(skus)
     }
 
     return jsonify({'data': data})
