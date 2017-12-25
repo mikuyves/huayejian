@@ -83,6 +83,22 @@ class Prod(leancloud.Object):
     def supplier(self, id):
         self.set('supplier', Supplier.create_without_data(id))
 
+    @property
+    def main_pic_url(self):
+        return self.get('mainPicUrl')
+
+    @main_pic_url.setter
+    def main_pic_url(self, value):
+        self.set('mainPicUrl', value)
+
+    @property
+    def thumbnail_url(self):
+        return self.get('thumbnailUrl')
+
+    @thumbnail_url.setter
+    def thumbnail_url(self, value):
+        self.set('thumbnailUrl', value)
+
     @classmethod
     def get_skus(cls, id):
         return Sku.query.equal_to('prod', cls.create_without_data(id)).find()

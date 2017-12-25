@@ -62,6 +62,7 @@ def get_goods():
 def create_goods():
     data = request.json
     print(data)
+    # SPU
     prod = Prod()
     prod.brand = data.get('brand').get('id')
     prod.cate = data.get('cate').get('id')
@@ -73,6 +74,12 @@ def create_goods():
     prod.is_all_sold_out = data.get('isAllSoldOut')
     prod.is_same_price = data.get('isSamePrice')
     prod.is_one_price = data.get('isOnePrice')
+    prod.main_pic_url = data.get('images')[0].get('url')
+    main_pic_id = data.get('images')[0].get('objectId')
+    # 生成缩略图。
+    image = leancloud.File.create_without_data(main_pic_id)
+    image.fetch()
+    prod.thumbnail_url = image.get_thumbnail_url(100, 100)
     prod.save()
 
     return jsonify({'msg': 'saved'})
