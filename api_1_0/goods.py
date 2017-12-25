@@ -5,7 +5,7 @@ from flask import jsonify, request
 
 import leancloud
 
-from utils import lc_dumps
+from utils import lc_dump, lc_dumps
 from models.goods import Prod, Sku, Cate, Brand, Supplier, Size, Color
 
 
@@ -26,7 +26,6 @@ def get_goods():
         .skip(start)\
         .limit(count)\
         .include('supplier')\
-        .include('mainPic')\
         .include('images')
 
     # 搜索
@@ -114,6 +113,35 @@ def create_goods():
         sku.save()
 
     return jsonify({'msg': 'saved'})
+
+
+@api.route('/goods/detail')
+def get_detail():
+    args = request.args
+    print(args)
+    _id = args.get('id')
+
+    prod = Prod.create_without_data(_id)
+    skus = Sku.query\
+        .equal_to('prod', prod)\
+        .include('color')\
+        .include('size1')\
+        .find()
+
+    prod.fetch(
+        # fetch: 从云端数据库获取数据到本地（服务器），使用后会覆盖本地数据。
+        # select: 选择字段，可节省流浪。
+        # include: 获取 Pointer 的数据。
+        include=['brand', 'cate', 'supplier', 'images']
+    )
+
+    data = {
+        'prod': lc_dump(prod),
+        'skuList': lc_dumps(skus)
+    }
+
+    return jsonify({'data': data})
+
 
 
 @api.route('/goods/inner_category', methods=['GET', 'POST'])
