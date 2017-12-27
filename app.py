@@ -32,7 +32,9 @@ app.register_blueprint(todos_view, url_prefix='/todos')
 
 # 注册 API 蓝本
 from api_1_0 import api as api_1_0_blueprint
+from api_1_1 import api as api_1_1_blueprint
 app.register_blueprint(api_1_0_blueprint, url_prefix='/api/v1.0')
+app.register_blueprint(api_1_1_blueprint, url_prefix='/api/v1.1')
 
 
 Prod = leancloud.Object.extend('Prod')
