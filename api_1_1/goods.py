@@ -50,14 +50,17 @@ def get_goods():
         # TODO: SKU 规格总汇计算太慢，有待处理。
         prod_id = good.get('objectId')
         sku_data = Prod.get_skus(prod_id)
-        total_stock = sum([sku.stock for sku in sku_data])
-        good['goodsStocks'] = [sku.stock for sku in sku_data]
+        good['totalStock'] = sum([sku.stock for sku in sku_data])
+        good['goodsStocks'] = [{'stock': sku.stock} for sku in sku_data]
         good['skuCount'] = len(sku_data)
 
         # 小程序前端需求字段。
         skus = lc_dumps(sku_data)
+        # TODO: 前端需要改善，不用传两套 SKU 数据。
+        # TODO: 改善 SKU 折扣价格。
         good['sku'] = skus
-        good['labels'] = {s.get('id'): s.get('name') for s in skus}
+        good['goodsSkuInfo'] = skus
+        good['labels'] = [{'key': s.get('id'), 'values': s.get('name').split('-')} for s in skus]
 
         good['imageUrl'] = good.get('mainPicUrl', '/images/icons/broken.png')
 
@@ -68,6 +71,7 @@ def get_goods():
         if not good['isOnePrice']:
             good['discount'] = True
             good['discountRate'] = '6折'
+            good['discountText'] = '会员折扣'
             good['sellPrice'] = price * 0.6
 
     from pprint import pprint
