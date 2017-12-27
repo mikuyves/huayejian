@@ -49,13 +49,16 @@ def get_goods():
     for good in goods:
         # TODO: SKU 规格总汇计算太慢，有待处理。
         prod_id = good.get('objectId')
-        skus = Prod.get_skus(prod_id)
-        print(skus)
-        total_stock = sum([sku.get('stock') for sku in skus])
+        sku_data = Prod.get_skus(prod_id)
+        total_stock = sum([sku.stock for sku in sku_data])
+        good['goodsStocks'] = [sku.stock for sku in sku_data]
+        good['skuCount'] = len(sku_data)
 
         # 小程序前端需求字段。
-        good['totalStock'] = total_stock
-        good['skuCount'] = len(skus)
+        skus = lc_dumps(sku_data)
+        good['sku'] = skus
+        good['labels'] = {s.get('id'): s.get('name') for s in skus}
+
         good['imageUrl'] = good.get('mainPicUrl', '/images/icons/broken.png')
 
         price = int(good.get('retailPrice'))
@@ -64,9 +67,11 @@ def get_goods():
         good['discount'] = False
         if not good['isOnePrice']:
             good['discount'] = True
+            good['discountRate'] = '6折'
             good['sellPrice'] = price * 0.6
 
-    print(goods)
+    from pprint import pprint
+    pprint(goods)
 
     return jsonify({'data': goods})
 
