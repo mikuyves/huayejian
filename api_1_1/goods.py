@@ -55,9 +55,16 @@ def get_goods():
 
         # 小程序前端需求字段。
         good['totalStock'] = total_stock
-        good['priceText'] = '¥ ' + str(good.get('retailPrice'))
         good['skuCount'] = len(skus)
-        good['imageUrl'] = good.get('thumbnailUrl', '/images/icons/broken.png')
+        good['imageUrl'] = good.get('mainPicUrl', '/images/icons/broken.png')
+
+        price = int(good.get('retailPrice'))
+        good['originalPrice'] = price
+        good['sellPrice'] = price
+        good['discount'] = False
+        if not good['isOnePrice']:
+            good['discount'] = True
+            good['sellPrice'] = price * 0.6
 
     print(goods)
 
