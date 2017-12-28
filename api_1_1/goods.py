@@ -9,11 +9,12 @@ from utils import lc_dump, lc_dumps
 from models.goods import Prod, Sku, Cate, Brand, Supplier, Size, Color
 
 
-@api.route('/goods/')
+@api.route('/goods')
 def get_goods():
     # 分页参数。
     start = int(request.args.get('from', 0))
     count = int(request.args.get('limit', 20))
+    # category_id 是可以变成其他分类： 例如按销售分类，按价格分类，按日期分类。
     category_id = request.args.get('category_id')
     status = request.args.get('goods_status')
     # 搜索关键字是 JSON 字符串，需要转换格式。
@@ -38,8 +39,11 @@ def get_goods():
         prod_query.equal_to(status, True)
     # 分类
     if category_id:
-        cate = Prod.create_without_data(category_id)
-        prod_query.equal_to('cate', cate)
+        if category_id == '-1':
+            pass
+        else:
+            cate = Prod.create_without_data(category_id)
+            prod_query.equal_to('cate', cate)
 
     prods = prod_query.find()
 
@@ -268,3 +272,38 @@ def home_discover():
     print(data)
     return jsonify({'data': data})
 
+
+@api.route('/goods/recommend')
+def get_recommend():
+    from_ = int(request.args.get('from'))
+    limit = int(request.args.get('limit'))
+    prods = Prod.query\
+        .descending('createdAt')\
+        .skip(from_)\
+        .limit(limit)\
+        .find()
+    data = lc_dumps(prods)
+    return jsonify({'data': data})
+
+
+@api.route('/goods/<id>')
+def get_goods_detail(id):
+    prod = Prod.create_without_data(id)
+    prod.fetch(include=[
+        'cate',
+        'supplier',
+        'images'
+    ])
+    good = lc_dump(prod)
+    price = int(good.get('retailPrice'))
+    good['originalPrice'] = price
+    good['sellPrice'] = price
+    good['discount'] = False
+    if not good['isOnePrice']:
+        good['discount'] = True
+        good['discountRate'] = '6折'
+        good['discountText'] = '会员折扣'
+        good['sellPrice'] = price * 0.6
+
+
+    return jsonify({'data': good})
