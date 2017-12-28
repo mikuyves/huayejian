@@ -125,7 +125,7 @@ def make_image_relations(**params):
 
     leancloud.use_master_key(True)
     File = leancloud.Object.extend('_File')
-    prods = Prod.query.ascending('createdAt').limit(num).find()
+    prods = Prod.query.descending('createdAt').limit(num).find()
     for num, p in enumerate(prods):
         urls = p.get('picUrls')
         for url in urls:
