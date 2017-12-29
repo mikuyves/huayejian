@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 
 from . import api
 from flask import jsonify, request
@@ -12,6 +13,7 @@ from models.goods import Prod, Sku, Cate, Brand, Supplier, Size, Color
 @api.route('/goods')
 def get_goods():
     # 分页参数。
+    pprint(request.args)
     start = int(request.args.get('from', 0))
     count = int(request.args.get('limit', 20))
     # category_id 是可以变成其他分类： 例如按销售分类，按价格分类，按日期分类。
@@ -19,7 +21,6 @@ def get_goods():
     status = request.args.get('goods_status')
     # 搜索关键字是 JSON 字符串，需要转换格式。
     keywords = request.args.get('search_keywords')
-    print(request.args)
 
     # 分页获取对象。
     prod_query = Prod.query\
@@ -45,7 +46,18 @@ def get_goods():
             cate = Prod.create_without_data(category_id)
             prod_query.equal_to('cate', cate)
 
-    prods = prod_query.find()
+    # 扫码二维码
+    if category_id == '-2':
+        scan_pid = int(request.args.get('scan_pid'))
+        print(scan_pid)
+        print(type(scan_pid))
+        prods = Prod.query\
+            .equal_to('pid', scan_pid)\
+            .include('supplier')\
+            .include('images')\
+            .find()
+    else:
+        prods = prod_query.find()
 
     # 将 Leancloud Object 转为字典格式。
     goods = lc_dumps(prods)
@@ -78,8 +90,7 @@ def get_goods():
             good['discountText'] = '会员折扣'
             good['sellPrice'] = price * 0.6
 
-    from pprint import pprint
-    pprint(goods)
+    # pprint(goods)
 
     return jsonify({'data': goods})
 
