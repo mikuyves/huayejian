@@ -1,17 +1,40 @@
 import json
 from pprint import pprint
+from functools import wraps
 
 from . import api
-from flask import jsonify, request
+from flask import jsonify, request, make_response
 
 import leancloud
+from leancloud.errors import LeanCloudError
 
 from utils import lc_dump, lc_dumps
 from models.goods import Prod, Sku, Cate, Brand, Supplier, Size, Color
 
 
+def login_required(func):
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        # 处理用户登录状态
+        # 如果用户不是用户，会抛出 leancloud.erros.LeanCloudError:
+        # [1] Please provide username/password,mobilePhoneNumber/password or mobilePhoneNumber/smsCode.
+        # 而前端则产生 500 (INTERNAL SERVER ERROR)。
+        try:
+            session_token = request.headers.get('sessionToken')
+            user = leancloud.User.become(session_token=session_token)
+            return func(*args, **kwargs)
+        except LeanCloudError:
+            return make_response(jsonify({'err': 'Not a user.'}), 505)
+    return wrap
+
+
 @api.route('/goods')
+@login_required
 def get_goods():
+    print('Request current user: ')
+    current_user = leancloud.User.get_current()
+    print(lc_dump(current_user))
+
     # 分页参数。
     pprint(request.args)
     start = int(request.args.get('from', 0))
