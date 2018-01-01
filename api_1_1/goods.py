@@ -19,6 +19,8 @@ def login_required(func):
         # 如果用户不是用户，会抛出 leancloud.erros.LeanCloudError:
         # [1] Please provide username/password,mobilePhoneNumber/password or mobilePhoneNumber/smsCode.
         # 而前端则产生 500 (INTERNAL SERVER ERROR)。
+        # 使用 leancloud.User.become() 之后，在本次请求中就可以用 leancloud.User.get_current()
+        # 获取当前的登录用户。因此不用把 user 传到后面的请求中。
         try:
             session_token = request.headers.get('sessionToken')
             user = leancloud.User.become(session_token=session_token)
@@ -32,6 +34,7 @@ def login_required(func):
 @login_required
 def get_goods():
     print('Request current user: ')
+    # 在 login_required 中已经使用 User.become() 识别当前登录用户，User.get_current() 可以获取当前登录用户。
     current_user = leancloud.User.get_current()
     print(lc_dump(current_user))
 
