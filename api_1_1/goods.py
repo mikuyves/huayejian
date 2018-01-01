@@ -8,26 +8,8 @@ from flask import jsonify, request, make_response
 import leancloud
 from leancloud.errors import LeanCloudError
 
-from utils import lc_dump, lc_dumps
+from utils import lc_dump, lc_dumps, login_required
 from models.goods import Prod, Sku, Cate, Brand, Supplier, Size, Color
-
-
-def login_required(func):
-    @wraps(func)
-    def wrap(*args, **kwargs):
-        # 处理用户登录状态
-        # 如果用户不是用户，会抛出 leancloud.erros.LeanCloudError:
-        # [1] Please provide username/password,mobilePhoneNumber/password or mobilePhoneNumber/smsCode.
-        # 而前端则产生 500 (INTERNAL SERVER ERROR)。
-        # 使用 leancloud.User.become() 之后，在本次请求中就可以用 leancloud.User.get_current()
-        # 获取当前的登录用户。因此不用把 user 传到后面的请求中。
-        try:
-            session_token = request.headers.get('sessionToken')
-            user = leancloud.User.become(session_token=session_token)
-            return func(*args, **kwargs)
-        except LeanCloudError:
-            return make_response(jsonify({'err': 'Not a user.'}), 505)
-    return wrap
 
 
 @api.route('/goods')
